@@ -1,0 +1,110 @@
+[
+  {
+    "id": "staple-egg-fried-rice",
+    "name": "鸡蛋炒饭",
+    "category": "主食",
+    "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=82",
+    "description": "粒粒分明的米饭搭配鸡蛋和葱花，简单耐吃。",
+    "isAvailable": true,
+    "sortOrder": 1
+  },
+  {
+    "id": "staple-beef-noodles",
+    "name": "红烧牛肉面",
+    "category": "主食",
+    "image": "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=900&q=82",
+    "description": "浓郁汤底配牛肉块和劲道面条，适合聚会垫肚子。",
+    "isAvailable": true,
+    "sortOrder": 2
+  },
+  {
+    "id": "meat-braised-pork",
+    "name": "家常红烧肉",
+    "category": "肉类",
+    "image": "https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=900&q=82",
+    "description": "肥瘦相间，酱香浓郁，适合多人分享。",
+    "isAvailable": true,
+    "sortOrder": 3
+  },
+  {
+    "id": "meat-spicy-chicken",
+    "name": "辣子鸡",
+    "category": "肉类",
+    "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=82",
+    "description": "鸡块外酥里嫩，搭配干辣椒和花椒香气。",
+    "isAvailable": true,
+    "sortOrder": 4
+  },
+  {
+    "id": "seafood-garlic-shrimp",
+    "name": "蒜蓉粉丝虾",
+    "category": "海鲜",
+    "image": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=900&q=82",
+    "description": "鲜虾搭配蒜蓉和粉丝，口味鲜香。",
+    "isAvailable": true,
+    "sortOrder": 5
+  },
+  {
+    "id": "seafood-steamed-fish",
+    "name": "清蒸鲈鱼",
+    "category": "海鲜",
+    "image": "https://images.unsplash.com/photo-1534766555764-ce878a5e3a2b?auto=format&fit=crop&w=900&q=82",
+    "description": "鱼肉细嫩，葱姜豉油提鲜，适合清淡口味。",
+    "isAvailable": true,
+    "sortOrder": 6
+  },
+  {
+    "id": "vegetable-garlic-lettuce",
+    "name": "蒜蓉生菜",
+    "category": "青菜",
+    "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=82",
+    "description": "清脆生菜搭配蒜蓉快炒，清爽解腻。",
+    "isAvailable": true,
+    "sortOrder": 7
+  },
+  {
+    "id": "vegetable-mushroom-bok-choy",
+    "name": "香菇青菜",
+    "category": "青菜",
+    "image": "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=82",
+    "description": "香菇鲜味和青菜清甜结合，适合搭配荤菜。",
+    "isAvailable": true,
+    "sortOrder": 8
+  },
+  {
+    "id": "drink-lemon-tea",
+    "name": "柠檬冰茶",
+    "category": "饮料",
+    "image": "https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=900&q=82",
+    "description": "酸甜清爽，适合聚会佐餐。",
+    "isAvailable": true,
+    "sortOrder": 9
+  },
+  {
+    "id": "drink-plum-soda",
+    "name": "梅子气泡水",
+    "category": "饮料",
+    "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=82",
+    "description": "梅子香气配气泡口感，清爽不腻。",
+    "isAvailable": true,
+    "sortOrder": 10
+  },
+  {
+    "id": "dessert-mango-pudding",
+    "name": "芒果布丁",
+    "category": "甜品",
+    "image": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=900&q=82",
+    "description": "口感顺滑，芒果味浓郁，适合作为饭后甜点。",
+    "isAvailable": true,
+    "sortOrder": 11
+  },
+  {
+    "id": "dessert-red-bean-soup",
+    "name": "红豆沙",
+    "category": "甜品",
+    "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=82",
+    "description": "绵密红豆沙，甜度温和，适合聚会收尾。",
+    "isAvailable": true,
+    "sortOrder": 12
+  }
+]

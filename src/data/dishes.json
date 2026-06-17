@@ -1,0 +1,74 @@
+[
+  {
+    "id": "beef-hotpot",
+    "name": "番茄牛腩小火锅",
+    "category": "热菜",
+    "price": 68,
+    "tag": "暖场",
+    "description": "酸甜番茄汤底配软烂牛腩，适合第一轮开吃。",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "crispy-chicken",
+    "name": "香脆盐酥鸡",
+    "category": "小吃",
+    "price": 36,
+    "tag": "下酒",
+    "description": "现炸鸡块、九层塔和椒盐香气，边聊边拿刚好。",
+    "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "shrimp-noodle",
+    "name": "鲜虾葱油拌面",
+    "category": "主食",
+    "price": 42,
+    "tag": "顶饿",
+    "description": "劲道面条裹住葱油和虾仁，适合需要认真吃一碗的人。",
+    "image": "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "mushroom-salad",
+    "name": "烤菌菇芝麻沙拉",
+    "category": "素食",
+    "price": 32,
+    "tag": "清爽",
+    "description": "烤口蘑、时蔬和芝麻酱汁，给桌面加一点清爽。",
+    "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "duck-roll",
+    "name": "脆皮鸭卷",
+    "category": "热菜",
+    "price": 58,
+    "tag": "分享",
+    "description": "鸭皮酥、黄瓜脆，卷好就能传给下一位朋友。",
+    "image": "https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "berry-soda",
+    "name": "莓果气泡饮",
+    "category": "饮品",
+    "price": 24,
+    "tag": "无酒精",
+    "description": "莓果、柠檬和气泡水，酸甜明亮，不抢菜味。",
+    "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "plum-wine",
+    "name": "冰镇梅子酒",
+    "category": "饮品",
+    "price": 45,
+    "tag": "微醺",
+    "description": "清甜梅香，冰块慢慢化开时最适合碰杯。",
+    "image": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "mango-pudding",
+    "name": "芒果椰奶布丁",
+    "category": "甜品",
+    "price": 26,
+    "tag": "收尾",
+    "description": "椰奶柔滑，芒果香浓，适合饭后慢慢分着吃。",
+    "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80"
+  }
+]

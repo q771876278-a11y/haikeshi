@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="点餐">
+  <rect width="64" height="64" rx="14" fill="#24745f"/>
+  <path fill="#f8f4ec" d="M18 15h28a4 4 0 0 1 4 4v4H14v-4a4 4 0 0 1 4-4Zm-4 14h36v17a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V29Zm10 6a3 3 0 1 0 0 6h16a3 3 0 1 0 0-6H24Z"/>
+</svg>
