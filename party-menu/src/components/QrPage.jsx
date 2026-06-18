@@ -2,6 +2,10 @@ import { ArrowLeft, Copy, Download, QrCode } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useMemo, useRef, useState } from 'react';
 
+const QR_DISPLAY_SIZE = 320;
+const QR_DOWNLOAD_SIZE = 1200;
+const QR_DOWNLOAD_PADDING = 120;
+
 export default function QrPage() {
   const canvasRef = useRef(null);
   const [copyMessage, setCopyMessage] = useState('');
@@ -22,9 +26,25 @@ export default function QrPage() {
       return;
     }
 
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = QR_DOWNLOAD_SIZE;
+    exportCanvas.height = QR_DOWNLOAD_SIZE;
+    const context = exportCanvas.getContext('2d');
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, QR_DOWNLOAD_SIZE, QR_DOWNLOAD_SIZE);
+    context.imageSmoothingEnabled = false;
+    context.drawImage(
+      canvas,
+      QR_DOWNLOAD_PADDING,
+      QR_DOWNLOAD_PADDING,
+      QR_DOWNLOAD_SIZE - QR_DOWNLOAD_PADDING * 2,
+      QR_DOWNLOAD_SIZE - QR_DOWNLOAD_PADDING * 2,
+    );
+
     const link = document.createElement('a');
     link.download = 'party-menu-qr.png';
-    link.href = canvas.toDataURL('image/png');
+    link.href = exportCanvas.toDataURL('image/png');
     link.click();
   }
 
@@ -57,11 +77,11 @@ export default function QrPage() {
           <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
             <QRCodeCanvas
               bgColor="#ffffff"
-              fgColor="#18211d"
+              fgColor="#000000"
               includeMargin
-              level="M"
+              level="H"
               ref={canvasRef}
-              size={240}
+              size={QR_DISPLAY_SIZE}
               value={orderUrl}
             />
           </div>

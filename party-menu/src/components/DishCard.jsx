@@ -41,8 +41,7 @@ export default function DishCard({ dish, quantity, onAdd, onRemove }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-bold text-stone-500">#{dish.sortOrder}</span>
+        <div className="flex items-center justify-end gap-3">
           <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-rice p-1 shadow-inner">
             <CircleButton ariaLabel={`减少 ${dish.name}`} disabled={quantity === 0} onClick={onRemove}>
               <Minus size={16} />
