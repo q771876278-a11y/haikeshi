@@ -41,3 +41,5 @@ Thumbs.db
 
 # Local generated artifacts
 *.local
+.vercel
+mobile-effect.png

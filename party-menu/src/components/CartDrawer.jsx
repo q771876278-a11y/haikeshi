@@ -21,6 +21,7 @@ export default function CartDrawer({
   onDelete,
   onIncrease,
   open,
+  totalAmount,
   totalQuantity,
 }) {
   return (
@@ -47,6 +48,7 @@ export default function CartDrawer({
             <div>
               <p className="text-sm font-semibold text-stone-500">购物车</p>
               <h2 className="text-[1.45rem] font-bold">{totalQuantity} 份菜品</h2>
+              <p className="mt-1 text-sm font-bold text-tomato">合计 ¥{totalAmount}</p>
             </div>
             <button
               aria-label="关闭购物车"
@@ -71,7 +73,9 @@ export default function CartDrawer({
                 >
                   <div className="min-w-0">
                     <p className="truncate font-bold">{item.name}</p>
-                    <p className="mt-1 text-sm text-stone-600">{item.quantity} 份</p>
+                    <p className="mt-1 text-sm text-stone-600">
+                      ¥{Number(item.price) || 0} x {item.quantity} 份
+                    </p>
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">

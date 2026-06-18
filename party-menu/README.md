@@ -10,10 +10,13 @@
 - 顶部展示餐厅欢迎语和聚会氛围背景。
 - 菜品按分类展示，分类 Tab 支持横向滚动。
 - 只展示 `isAvailable: true` 的菜品，并按 `sortOrder` 排序。
+- 每个菜品支持配置价格，点餐页、购物车和订单会显示金额。
 - 菜品支持 `+` / `-` 修改数量，数量为 0 时自动从购物车移除。
 - 底部固定购物车栏，显示已选数量、查看购物车和去提交按钮。
 - 购物车抽屉从底部弹出，支持增减数量、删除菜品。
 - 提交订单时填写朋友姓名和备注。
+- 提供纯前端管理员后台页面，可新增、删除、编辑菜品，支持修改价格、分类、图片、上下架状态和排序。
+- 管理员后台支持本地图片上传、菜品 JSON 导入和导出。
 - 支持 Webhook 提交订单。
 - 未配置 Webhook 时支持本地测试订单查看页面。
 - 支持生成点餐二维码，方便发给朋友扫码。
@@ -64,6 +67,7 @@ src/data/dishes.json
   "category": "肉类",
   "image": "https://placehold.co/800x600?text=Spicy+Chicken",
   "description": "鸡块外酥里嫩，搭配干辣椒和花椒香气。",
+  "price": 42,
   "isAvailable": true,
   "sortOrder": 4
 }
@@ -76,10 +80,35 @@ src/data/dishes.json
 - `category`：菜品分类，例如主食、肉类、海鲜、青菜、饮料、甜品。
 - `image`：菜品图片 URL，可以替换为自己的图片地址。
 - `description`：菜品描述。
+- `price`：菜品价格，单位为元。
 - `isAvailable`：是否可点，`true` 会显示，`false` 不显示。
 - `sortOrder`：排序值，数字越小越靠前。
 
 修改保存后，开发环境会自动刷新页面。
+
+也可以打开管理员后台临时编辑：
+
+```text
+http://localhost:5175/#/admin
+```
+
+后台页面支持：
+
+- 新增菜品
+- 删除菜品
+- 搜索菜品
+- 按分类筛选
+- 修改菜名、分类、价格、排序、描述
+- 修改图片 URL
+- 上传本地图片
+- 设置菜品上架或下架
+- 导入菜品 JSON
+- 导出菜品 JSON
+- 恢复 `src/data/dishes.json` 默认数据
+
+后台修改会保存到当前浏览器的 `localStorage`，点餐页会优先使用后台保存的菜品数据。点击“保存”后，当前浏览器里的点餐页面会立即使用最新菜单。
+
+注意：这是纯前端本地后台，不带登录鉴权，也不会自动写回 `dishes.json` 文件。本地图片上传会把图片转成 `data URL` 保存在当前浏览器，不会上传到云端服务器。部署后如果需要让所有朋友看到同一套长期菜单，建议修改 `dishes.json` 后重新部署，或接入真正的后台服务和图片存储服务。
 
 ## 如何配置 Webhook
 
@@ -108,10 +137,13 @@ VITE_ORDER_WEBHOOK_URL=https://your-webhook.example/order
       "dishId": "meat-spicy-chicken",
       "name": "辣子鸡",
       "category": "肉类",
-      "quantity": 2
+      "price": 42,
+      "quantity": 2,
+      "subtotal": 84
     }
   ],
   "totalQuantity": 2,
+  "totalAmount": 84,
   "createdAt": "2026-06-17T12:00:00.000Z",
   "source": "party-menu"
 }

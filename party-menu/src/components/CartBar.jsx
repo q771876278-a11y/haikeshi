@@ -1,9 +1,16 @@
 import { Loader2, Send, ShoppingBag } from 'lucide-react';
 
-export default function CartBar({ isSubmitting, onOpenCart, onOpenSubmit, status, totalQuantity }) {
+export default function CartBar({
+  isSubmitting,
+  onOpenCart,
+  onOpenSubmit,
+  status,
+  totalAmount,
+  totalQuantity,
+}) {
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white/96 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_30px_rgba(24,33,29,0.12)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_30px_rgba(24,33,29,0.12)]"
     >
       <div className="mx-auto flex w-full max-w-[480px] items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-3">
@@ -13,6 +20,7 @@ export default function CartBar({ isSubmitting, onOpenCart, onOpenSubmit, status
           <div className="min-w-0">
             <p className="text-xs font-semibold text-stone-500">已选择</p>
             <p className="truncate text-lg font-bold text-ink">{totalQuantity} 份菜品</p>
+            <p className="text-xs font-bold text-tomato">合计 ¥{totalAmount}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">

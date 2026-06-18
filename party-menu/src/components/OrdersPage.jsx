@@ -13,6 +13,10 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function formatAmount(value) {
+  return typeof value === 'number' ? `¥${value}` : '未记录';
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
 
@@ -70,7 +74,7 @@ export default function OrdersPage() {
                     <p className="mt-1 text-sm text-stone-500">{formatTime(order.createdAt)}</p>
                   </div>
                   <span className="rounded-full bg-rice px-3 py-1 text-sm font-bold text-leaf">
-                    {order.totalQuantity || 0} 份
+                    {order.totalQuantity || 0} 份 · {formatAmount(order.totalAmount)}
                   </span>
                 </div>
 
@@ -82,9 +86,15 @@ export default function OrdersPage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold">{item.name}</p>
-                        <p className="text-sm text-stone-600">{item.category}</p>
+                        <p className="text-sm text-stone-600">
+                          {item.category}
+                          {typeof item.price === 'number' ? ` · ¥${item.price}` : ''}
+                        </p>
                       </div>
-                      <strong className="shrink-0 text-sm">{item.quantity} 份</strong>
+                      <strong className="shrink-0 text-sm">
+                        {item.quantity} 份
+                        {typeof item.subtotal === 'number' ? ` · ¥${item.subtotal}` : ''}
+                      </strong>
                     </div>
                   ))}
                 </div>

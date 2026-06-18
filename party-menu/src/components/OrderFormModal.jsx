@@ -7,6 +7,7 @@ export default function OrderFormModal({
   onClose,
   onSubmit,
   open,
+  totalAmount,
   totalQuantity,
 }) {
   const [customerName, setCustomerName] = useState('');
@@ -34,6 +35,7 @@ export default function OrderFormModal({
           <div>
             <p className="text-sm font-semibold text-stone-500">提交订单</p>
             <h2 className="text-[1.45rem] font-bold">{totalQuantity} 份菜品</h2>
+            <p className="mt-1 text-sm font-bold text-tomato">合计 ¥{totalAmount}</p>
           </div>
           <button
             aria-label="关闭提交表单"

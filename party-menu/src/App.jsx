@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PartyPopper, QrCode, Sparkles } from 'lucide-react';
+import AdminPage from './components/AdminPage';
 import CartBar from './components/CartBar';
 import CartDrawer from './components/CartDrawer';
 import CategoryTabs from './components/CategoryTabs';
@@ -8,13 +9,15 @@ import OrderFormModal from './components/OrderFormModal';
 import OrdersPage from './components/OrdersPage';
 import QrPage from './components/QrPage';
 import SuccessModal from './components/SuccessModal';
-import dishes from './data/dishes.json';
+import defaultDishes from './data/dishes.json';
 import { createOrder, hasWebhook, submitOrder } from './utils/orderSubmit';
+import { readStoredDishes } from './utils/storage';
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash || '#/');
   const [activeCategory, setActiveCategory] = useState('全部');
   const [cart, setCart] = useState({});
+  const [dishes, setDishes] = useState(() => readStoredDishes(defaultDishes));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [orderFormOpen, setOrderFormOpen] = useState(false);
   const [formError, setFormError] = useState('');
@@ -41,13 +44,19 @@ export default function App() {
 
   const availableDishes = useMemo(
     () => dishes.filter((dish) => dish.isAvailable).sort((a, b) => a.sortOrder - b.sortOrder),
-    [],
+    [dishes],
   );
 
   const categories = useMemo(
     () => ['全部', ...Array.from(new Set(availableDishes.map((dish) => dish.category)))],
     [availableDishes],
   );
+
+  useEffect(() => {
+    if (!categories.includes(activeCategory)) {
+      setActiveCategory('全部');
+    }
+  }, [activeCategory, categories]);
 
   const filteredDishes = useMemo(() => {
     if (activeCategory === '全部') {
@@ -68,6 +77,10 @@ export default function App() {
   );
 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + (Number(item.price) || 0) * item.quantity,
+    0,
+  );
   const isSubmitting = status.type === 'submitting';
   const modeMessage = hasWebhook()
     ? '订单将推送给聚会主人'
@@ -136,6 +149,7 @@ export default function App() {
       customerName,
       remark,
       items: cartItems,
+      totalAmount,
       totalQuantity,
     });
 
@@ -162,6 +176,16 @@ export default function App() {
 
   if (route === '#/qr') {
     return <QrPage />;
+  }
+
+  if (route === '#/admin') {
+    return (
+      <AdminPage
+        defaultDishes={defaultDishes}
+        dishes={dishes}
+        onDishesChange={setDishes}
+      />
+    );
   }
 
   return (
@@ -252,6 +276,7 @@ export default function App() {
         onOpenCart={() => setDrawerOpen(true)}
         onOpenSubmit={openOrderForm}
         status={status}
+        totalAmount={totalAmount}
         totalQuantity={totalQuantity}
       />
 
@@ -262,6 +287,7 @@ export default function App() {
         onDelete={deleteDish}
         onIncrease={addDish}
         open={drawerOpen}
+        totalAmount={totalAmount}
         totalQuantity={totalQuantity}
       />
 
@@ -271,6 +297,7 @@ export default function App() {
         onClose={() => setOrderFormOpen(false)}
         onSubmit={handleSubmitOrder}
         open={orderFormOpen}
+        totalAmount={totalAmount}
         totalQuantity={totalQuantity}
       />
 

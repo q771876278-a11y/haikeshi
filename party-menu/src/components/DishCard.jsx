@@ -15,6 +15,8 @@ function CircleButton({ ariaLabel, children, disabled = false, onClick }) {
 }
 
 export default function DishCard({ dish, quantity, onAdd, onRemove }) {
+  const price = Number(dish.price) || 0;
+
   return (
     <article className="grid grid-cols-[124px_1fr] overflow-hidden rounded-lg border border-stone-200 bg-white shadow-[0_10px_28px_rgba(24,33,29,0.08)]">
       <div className="relative h-[160px] overflow-hidden bg-stone-100">
@@ -30,7 +32,10 @@ export default function DishCard({ dish, quantity, onAdd, onRemove }) {
       </div>
       <div className="flex min-w-0 flex-col justify-between gap-3 p-3.5">
         <div className="min-w-0">
-          <h2 className="text-[1.02rem] font-bold leading-snug">{dish.name}</h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-[1.02rem] font-bold leading-snug">{dish.name}</h2>
+            <span className="shrink-0 text-base font-black text-tomato">¥{price}</span>
+          </div>
           <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">
             {dish.description}
           </p>

@@ -6,17 +6,23 @@ export function hasWebhook() {
   return Boolean(webhookUrl);
 }
 
-export function createOrder({ customerName, remark, items, totalQuantity }) {
+export function createOrder({ customerName, remark, items, totalAmount, totalQuantity }) {
   return {
     customerName: customerName.trim(),
     remark: remark.trim(),
-    items: items.map(({ id, name, category, quantity }) => ({
-      dishId: id,
-      name,
-      category,
-      quantity,
-    })),
+    items: items.map(({ id, name, category, price, quantity }) => {
+      const unitPrice = Number(price) || 0;
+      return {
+        dishId: id,
+        name,
+        category,
+        price: unitPrice,
+        quantity,
+        subtotal: unitPrice * quantity,
+      };
+    }),
     totalQuantity,
+    totalAmount,
     createdAt: new Date().toISOString(),
     source: 'party-menu',
   };
