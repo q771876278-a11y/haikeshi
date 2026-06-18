@@ -128,12 +128,13 @@ cp .env.example .env
 VITE_ORDER_WEBHOOK_URL=/api/orders
 KV_REST_API_URL=https://your-redis-url.upstash.io
 KV_REST_API_TOKEN=your_redis_rest_token
+REDIS_URL=redis://default:password@host:port
 ADMIN_SETUP_TOKEN=change_me_to_a_long_random_password
 FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-bot-id
 FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
 ```
 
-`VITE_ORDER_WEBHOOK_URL` 留空时也会默认使用 `/api/orders`。`KV_REST_API_URL` 和 `KV_REST_API_TOKEN` 用于服务端函数连接 Vercel KV / Upstash Redis，不能写成 `VITE_` 开头。
+`VITE_ORDER_WEBHOOK_URL` 留空时也会默认使用 `/api/orders`。`KV_REST_API_URL` / `KV_REST_API_TOKEN` 或 `REDIS_URL` 用于服务端函数连接 Redis，不能写成 `VITE_` 开头。两种 Redis 配置方式二选一即可。
 
 `ADMIN_SETUP_TOKEN` 是管理员后台保存飞书配置时使用的口令。`FEISHU_WEBHOOK_URL` 用于把新订单推送到飞书群。如果飞书机器人开启了“签名校验”，还需要填写 `FEISHU_WEBHOOK_SECRET`；如果没有开启签名校验，可以不配置这个变量。
 
@@ -143,7 +144,7 @@ FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
 
 推荐方式是在管理员后台一键连接：
 
-1. 在 Vercel 环境变量里配置 `KV_REST_API_URL`、`KV_REST_API_TOKEN` 和 `ADMIN_SETUP_TOKEN`。
+1. 在 Vercel 环境变量里配置 `REDIS_URL` 或 `KV_REST_API_URL` / `KV_REST_API_TOKEN`，并配置 `ADMIN_SETUP_TOKEN`。
 2. 重新部署 Vercel。
 3. 打开 `https://xxx.vercel.app/#/admin`。
 4. 切换到“飞书设置”。
@@ -218,7 +219,7 @@ npm run dev
 party_menu_orders
 ```
 
-部署到 Vercel 并配置 `KV_REST_API_URL` / `KV_REST_API_TOKEN` 后，订单会保存到后端，管理员后台可以集中查询。
+部署到 Vercel 并配置 `REDIS_URL` 或 `KV_REST_API_URL` / `KV_REST_API_TOKEN` 后，订单会保存到后端，管理员后台可以集中查询。
 
 本地测试订单查看页面：
 
@@ -261,6 +262,7 @@ dist
 VITE_ORDER_WEBHOOK_URL=/api/orders
 KV_REST_API_URL=https://your-redis-url.upstash.io
 KV_REST_API_TOKEN=your_redis_rest_token
+REDIS_URL=redis://default:password@host:port
 ADMIN_SETUP_TOKEN=change_me_to_a_long_random_password
 FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-bot-id
 FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
@@ -322,10 +324,11 @@ https://xxx.vercel.app/
 VITE_ORDER_WEBHOOK_URL=/api/orders
 KV_REST_API_URL
 KV_REST_API_TOKEN
+REDIS_URL
 FEISHU_WEBHOOK_URL
 ```
 
-如果缺少 `KV_REST_API_URL` 或 `KV_REST_API_TOKEN`，管理员后台无法查询集中订单。如果只想先用飞书收单，至少需要配置 `FEISHU_WEBHOOK_URL`。
+如果没有配置 `REDIS_URL`，也没有配置 `KV_REST_API_URL` / `KV_REST_API_TOKEN`，管理员后台无法查询集中订单，也无法从后台保存飞书配置。如果只想先用飞书收单，至少需要配置 `FEISHU_WEBHOOK_URL`。
 
 ### 2. 修改 `.env` 后为什么没有生效？
 

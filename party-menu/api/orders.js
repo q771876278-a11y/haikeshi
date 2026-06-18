@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { createClient } from 'redis';
 
 const ORDER_KEY = 'party_menu_orders';
 const FEISHU_CONFIG_KEY = 'party_menu_feishu_config';
@@ -6,6 +7,7 @@ const MAX_ORDERS = 500;
 
 function getRedisConfig() {
   return {
+    redisUrl: process.env.REDIS_URL || '',
     token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
     url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
   };
@@ -19,8 +21,8 @@ function getFeishuConfig() {
 }
 
 function hasRedisConfig() {
-  const { token, url } = getRedisConfig();
-  return Boolean(token && url);
+  const { redisUrl, token, url } = getRedisConfig();
+  return Boolean(redisUrl || (token && url));
 }
 
 function json(res, statusCode, payload) {
@@ -47,32 +49,65 @@ async function readBody(req) {
 }
 
 async function redis(command) {
-  const { token, url } = getRedisConfig();
+  const { redisUrl, token, url } = getRedisConfig();
 
-  if (!token || !url) {
-    const error = new Error('订单后端未配置 KV_REST_API_URL / KV_REST_API_TOKEN。');
+  if (token && url) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || payload.error) {
+      const error = new Error(payload.error || `Redis 请求失败：${response.status}`);
+      error.statusCode = 500;
+      throw error;
+    }
+
+    return payload.result;
+  }
+
+  if (!redisUrl) {
+    const error = new Error('订单后端未配置 KV_REST_API_URL / KV_REST_API_TOKEN 或 REDIS_URL。');
     error.statusCode = 500;
     throw error;
   }
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(command),
-  });
+  const client = createClient({ url: redisUrl });
+  await client.connect();
 
-  const payload = await response.json().catch(() => ({}));
+  try {
+    const [name, ...args] = command;
+    const commandName = String(name).toUpperCase();
 
-  if (!response.ok || payload.error) {
-    const error = new Error(payload.error || `Redis 请求失败：${response.status}`);
-    error.statusCode = 500;
-    throw error;
+    if (commandName === 'GET') {
+      return client.get(args[0]);
+    }
+    if (commandName === 'SET') {
+      return client.set(args[0], args[1]);
+    }
+    if (commandName === 'DEL') {
+      return client.del(args[0]);
+    }
+    if (commandName === 'LPUSH') {
+      return client.lPush(args[0], args[1]);
+    }
+    if (commandName === 'LTRIM') {
+      return client.lTrim(args[0], Number(args[1]), Number(args[2]));
+    }
+    if (commandName === 'LRANGE') {
+      return client.lRange(args[0], Number(args[1]), Number(args[2]));
+    }
+
+    throw new Error(`不支持的 Redis 命令：${commandName}`);
+  } finally {
+    await client.disconnect();
   }
-
-  return payload.result;
 }
 
 async function readStoredFeishuConfig() {
