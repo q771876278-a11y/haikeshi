@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Bot,
   ClipboardList,
   Download,
   ImagePlus,
@@ -8,6 +9,7 @@ import {
   RotateCcw,
   Save,
   Search,
+  Send,
   Trash2,
   Upload,
   Utensils,
@@ -23,6 +25,7 @@ import {
 } from '../utils/storage';
 
 const orderApiEndpoint = import.meta.env.VITE_ORDER_WEBHOOK_URL?.trim() || '/api/orders';
+const feishuApiEndpoint = '/api/feishu';
 
 function normalizeDish(dish) {
   return {
@@ -87,6 +90,20 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
   const [orders, setOrders] = useState(() => readStoredOrders());
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [orderSource, setOrderSource] = useState('backend');
+  const [feishuStatus, setFeishuStatus] = useState({
+    adminTokenRequired: false,
+    configured: false,
+    envConfigured: false,
+    kvConfigured: false,
+    signed: false,
+    storedConfigured: false,
+  });
+  const [feishuForm, setFeishuForm] = useState({
+    adminToken: '',
+    secret: '',
+    webhookUrl: '',
+  });
+  const [feishuLoading, setFeishuLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('全部');
   const [message, setMessage] = useState('');
@@ -142,6 +159,10 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
       window.removeEventListener('storage', handleStorage);
       window.clearInterval(timer);
     };
+  }, []);
+
+  useEffect(() => {
+    loadFeishuStatus();
   }, []);
 
   function replaceDishes(nextDishes, nextSelectedId = selectedId) {
@@ -323,6 +344,85 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
     }
   }
 
+  async function loadFeishuStatus() {
+    try {
+      const response = await fetch(feishuApiEndpoint);
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.success !== true) {
+        throw new Error(payload.message || `飞书接口返回 ${response.status}`);
+      }
+
+      setFeishuStatus({
+        adminTokenRequired: Boolean(payload.adminTokenRequired),
+        configured: Boolean(payload.configured),
+        envConfigured: Boolean(payload.envConfigured),
+        kvConfigured: Boolean(payload.kvConfigured),
+        signed: Boolean(payload.signed),
+        storedConfigured: Boolean(payload.storedConfigured),
+      });
+    } catch (error) {
+      console.error('读取飞书配置失败:', error);
+      setMessage(`读取飞书配置失败：${error.message}`);
+    }
+  }
+
+  async function handleSaveFeishuConfig(event) {
+    event.preventDefault();
+    setFeishuLoading(true);
+
+    try {
+      const response = await fetch(feishuApiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feishuForm),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.success !== true) {
+        throw new Error(payload.message || `飞书接口返回 ${response.status}`);
+      }
+
+      setMessage(payload.message || '飞书已连接。');
+      setFeishuForm((current) => ({ ...current, secret: '', webhookUrl: '' }));
+      await loadFeishuStatus();
+    } catch (error) {
+      console.error('保存飞书配置失败:', error);
+      setMessage(`保存飞书配置失败：${error.message}`);
+    } finally {
+      setFeishuLoading(false);
+    }
+  }
+
+  async function handleClearFeishuConfig() {
+    if (!window.confirm('确定清除后台保存的飞书配置吗？')) {
+      return;
+    }
+
+    setFeishuLoading(true);
+
+    try {
+      const response = await fetch(feishuApiEndpoint, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminToken: feishuForm.adminToken }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload.success !== true) {
+        throw new Error(payload.message || `飞书接口返回 ${response.status}`);
+      }
+
+      setMessage(payload.message || '已清除飞书配置。');
+      await loadFeishuStatus();
+    } catch (error) {
+      console.error('清除飞书配置失败:', error);
+      setMessage(`清除飞书配置失败：${error.message}`);
+    } finally {
+      setFeishuLoading(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-rice text-ink">
       <section className="mx-auto w-full max-w-5xl space-y-4 px-3 py-4 sm:px-5">
@@ -339,12 +439,18 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
             <div>
               <p className="text-sm font-semibold text-stone-500">管理员后台</p>
               <h1 className="mt-1 text-2xl font-bold">
-                {activePanel === 'dishes' ? '菜品管理' : '订单查询'}
+                {activePanel === 'dishes'
+                  ? '菜品管理'
+                  : activePanel === 'orders'
+                    ? '订单查询'
+                    : '飞书设置'}
               </h1>
               <p className="mt-2 text-sm leading-6 text-stone-600">
                 {activePanel === 'dishes'
                   ? '管理菜品名称、分类、价格、图片、描述和上下架状态。'
-                  : '查看当前浏览器保存的订单，适合未配置 Webhook 时本地测试。'}
+                  : activePanel === 'orders'
+                    ? '查看后端集中订单，客户下单后会自动进入这里。'
+                    : '保存飞书机器人 Webhook，并发送测试消息。'}
               </p>
             </div>
 
@@ -399,7 +505,7 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
                     保存
                   </button>
                 </>
-              ) : (
+              ) : activePanel === 'orders' ? (
                 <>
                   <button
                     className="inline-flex h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 text-sm font-bold text-ink"
@@ -420,11 +526,32 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
                     清空订单
                   </button>
                 </>
+              ) : (
+                <>
+                  <button
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 text-sm font-bold text-ink"
+                    disabled={feishuLoading}
+                    onClick={loadFeishuStatus}
+                    type="button"
+                  >
+                    <RefreshCw className={feishuLoading ? 'animate-spin' : ''} size={16} />
+                    刷新状态
+                  </button>
+                  <button
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-tomato px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={feishuLoading || !feishuStatus.storedConfigured}
+                    onClick={handleClearFeishuConfig}
+                    type="button"
+                  >
+                    <Trash2 size={16} />
+                    清除配置
+                  </button>
+                </>
               )}
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 rounded-full bg-rice p-1">
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-full bg-rice p-1">
             <button
               className={`inline-flex h-10 items-center justify-center gap-2 rounded-full text-sm font-black ${
                 activePanel === 'dishes' ? 'bg-leaf text-white shadow-sm' : 'text-stone-600'
@@ -445,6 +572,16 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
               <ClipboardList size={16} />
               订单查询
             </button>
+            <button
+              className={`inline-flex h-10 items-center justify-center gap-2 rounded-full text-sm font-black ${
+                activePanel === 'feishu' ? 'bg-leaf text-white shadow-sm' : 'text-stone-600'
+              }`}
+              onClick={() => setActivePanel('feishu')}
+              type="button"
+            >
+              <Bot size={16} />
+              飞书设置
+            </button>
           </div>
 
           {activePanel === 'dishes' ? (
@@ -464,7 +601,7 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
                 </p>
               </div>
             </div>
-          ) : (
+          ) : activePanel === 'orders' ? (
             <div className="mt-4 grid grid-cols-3 gap-2">
               <div className="rounded-lg bg-rice p-3">
                 <p className="text-xs font-bold text-stone-500">订单</p>
@@ -477,6 +614,27 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
               <div className="rounded-lg bg-rice p-3">
                 <p className="text-xs font-bold text-stone-500">金额</p>
                 <p className="mt-1 text-xl font-black text-tomato">¥{orderTotalAmount}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <div className="rounded-lg bg-rice p-3">
+                <p className="text-xs font-bold text-stone-500">飞书</p>
+                <p className="mt-1 text-xl font-black text-leaf">
+                  {feishuStatus.configured ? '已连' : '未连'}
+                </p>
+              </div>
+              <div className="rounded-lg bg-rice p-3">
+                <p className="text-xs font-bold text-stone-500">来源</p>
+                <p className="mt-1 text-xl font-black text-ink">
+                  {feishuStatus.envConfigured ? '环境' : feishuStatus.storedConfigured ? '后台' : '-'}
+                </p>
+              </div>
+              <div className="rounded-lg bg-rice p-3">
+                <p className="text-xs font-bold text-stone-500">签名</p>
+                <p className="mt-1 text-xl font-black text-tomato">
+                  {feishuStatus.signed ? '开启' : '未开'}
+                </p>
               </div>
             </div>
           )}
@@ -685,7 +843,7 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
               </div>
             )}
           </section>
-        ) : (
+        ) : activePanel === 'orders' ? (
           <section className="space-y-3" aria-label="订单查询列表">
             <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
               <p className="text-sm font-bold text-stone-700">订单来源说明</p>
@@ -746,6 +904,109 @@ export default function AdminPage({ defaultDishes, dishes, onDishesChange }) {
                 </article>
               ))
             )}
+          </section>
+        ) : (
+          <section className="space-y-4" aria-label="飞书设置">
+            <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-bold text-stone-700">飞书连接状态</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-600">
+                    {feishuStatus.configured
+                      ? '飞书机器人已经配置，客户下单后会尝试推送到飞书群。'
+                      : '还没有配置飞书机器人。填写 Webhook 后点击保存并测试。'}
+                  </p>
+                </div>
+                <span
+                  className={`w-fit rounded-full px-3 py-1 text-sm font-black ${
+                    feishuStatus.configured
+                      ? 'bg-leaf/10 text-leaf'
+                      : 'bg-tomato/10 text-tomato'
+                  }`}
+                >
+                  {feishuStatus.configured ? '已连接' : '未连接'}
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-lg bg-rice p-3">
+                  <p className="text-xs font-bold text-stone-500">KV 存储</p>
+                  <p className="mt-1 text-lg font-black">{feishuStatus.kvConfigured ? '已配置' : '未配置'}</p>
+                </div>
+                <div className="rounded-lg bg-rice p-3">
+                  <p className="text-xs font-bold text-stone-500">后台配置</p>
+                  <p className="mt-1 text-lg font-black">{feishuStatus.storedConfigured ? '已保存' : '未保存'}</p>
+                </div>
+                <div className="rounded-lg bg-rice p-3">
+                  <p className="text-xs font-bold text-stone-500">环境变量</p>
+                  <p className="mt-1 text-lg font-black">{feishuStatus.envConfigured ? '已配置' : '未配置'}</p>
+                </div>
+              </div>
+            </div>
+
+            <form className="rounded-lg bg-white p-4 shadow-sm" onSubmit={handleSaveFeishuConfig}>
+              <div className="mb-4">
+                <p className="text-sm font-bold text-stone-700">一键连接飞书</p>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  配置会保存到后端 KV，不会暴露给点餐前台。保存成功后会自动发送一条飞书测试消息。
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                <label className="grid gap-1.5 text-sm font-semibold text-stone-700">
+                  管理员部署口令
+                  <input
+                    className="h-11 rounded-lg border border-stone-200 px-3 text-base outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/20"
+                    onChange={(event) =>
+                      setFeishuForm((current) => ({ ...current, adminToken: event.target.value }))
+                    }
+                    placeholder="Vercel 环境变量 ADMIN_SETUP_TOKEN"
+                    type="password"
+                    value={feishuForm.adminToken}
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm font-semibold text-stone-700">
+                  飞书机器人 Webhook
+                  <input
+                    className="h-11 rounded-lg border border-stone-200 px-3 text-base outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/20"
+                    onChange={(event) =>
+                      setFeishuForm((current) => ({ ...current, webhookUrl: event.target.value }))
+                    }
+                    placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..."
+                    value={feishuForm.webhookUrl}
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm font-semibold text-stone-700">
+                  签名 Secret
+                  <input
+                    className="h-11 rounded-lg border border-stone-200 px-3 text-base outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/20"
+                    onChange={(event) =>
+                      setFeishuForm((current) => ({ ...current, secret: event.target.value }))
+                    }
+                    placeholder="飞书机器人开启签名校验时填写"
+                    type="password"
+                    value={feishuForm.secret}
+                  />
+                </label>
+              </div>
+
+              <button
+                className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-tomato px-5 text-sm font-bold text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={feishuLoading}
+                type="submit"
+              >
+                <Send size={17} />
+                {feishuLoading ? '连接中...' : '保存并发送测试消息'}
+              </button>
+            </form>
+
+            <div className="rounded-lg border border-stone-200 bg-white p-4 text-sm leading-6 text-stone-600 shadow-sm">
+              使用前需要在 Vercel 先配置 `KV_REST_API_URL`、`KV_REST_API_TOKEN` 和
+              `ADMIN_SETUP_TOKEN`。如果已经通过 Vercel 环境变量配置了 `FEISHU_WEBHOOK_URL`，
+              后台保存的配置不会覆盖环境变量。
+            </div>
           </section>
         )}
       </section>

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
 const ORDER_KEY = 'party_menu_orders';
+const FEISHU_CONFIG_KEY = 'party_menu_feishu_config';
 const MAX_ORDERS = 500;
 
 function getRedisConfig() {
@@ -74,6 +75,27 @@ async function redis(command) {
   return payload.result;
 }
 
+async function readStoredFeishuConfig() {
+  if (!hasRedisConfig()) {
+    return { secret: '', url: '' };
+  }
+
+  const rawConfig = await redis(['GET', FEISHU_CONFIG_KEY]);
+  if (!rawConfig) {
+    return { secret: '', url: '' };
+  }
+
+  try {
+    const config = JSON.parse(rawConfig);
+    return {
+      secret: config.secret || '',
+      url: config.url || '',
+    };
+  } catch {
+    return { secret: '', url: '' };
+  }
+}
+
 function createFeishuSign(timestamp, secret) {
   const stringToSign = `${timestamp}\n${secret}`;
   return crypto.createHmac('sha256', stringToSign).update('').digest('base64');
@@ -106,7 +128,10 @@ function formatFeishuOrder(order) {
 }
 
 async function sendOrderToFeishu(order) {
-  const { secret, url } = getFeishuConfig();
+  const envConfig = getFeishuConfig();
+  const storedConfig = envConfig.url ? { secret: '', url: '' } : await readStoredFeishuConfig();
+  const secret = envConfig.secret || storedConfig.secret;
+  const url = envConfig.url || storedConfig.url;
 
   if (!url) {
     return { configured: false, sent: false };

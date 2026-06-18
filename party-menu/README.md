@@ -128,23 +128,37 @@ cp .env.example .env
 VITE_ORDER_WEBHOOK_URL=/api/orders
 KV_REST_API_URL=https://your-redis-url.upstash.io
 KV_REST_API_TOKEN=your_redis_rest_token
+ADMIN_SETUP_TOKEN=change_me_to_a_long_random_password
 FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-bot-id
 FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
 ```
 
 `VITE_ORDER_WEBHOOK_URL` 留空时也会默认使用 `/api/orders`。`KV_REST_API_URL` 和 `KV_REST_API_TOKEN` 用于服务端函数连接 Vercel KV / Upstash Redis，不能写成 `VITE_` 开头。
 
-`FEISHU_WEBHOOK_URL` 用于把新订单推送到飞书群。如果飞书机器人开启了“签名校验”，还需要填写 `FEISHU_WEBHOOK_SECRET`；如果没有开启签名校验，可以不配置这个变量。
+`ADMIN_SETUP_TOKEN` 是管理员后台保存飞书配置时使用的口令。`FEISHU_WEBHOOK_URL` 用于把新订单推送到飞书群。如果飞书机器人开启了“签名校验”，还需要填写 `FEISHU_WEBHOOK_SECRET`；如果没有开启签名校验，可以不配置这个变量。
 
 配置后，订单会通过 `fetch POST` 提交到 `/api/orders`，服务端会集中保存订单，并把订单推送到飞书。管理员后台的“订单查询”会通过 `GET /api/orders` 读取订单。
 
 ## 如何配置飞书机器人
 
-1. 在飞书群里添加“自定义机器人”。
-2. 复制机器人 Webhook 地址，填到 Vercel 环境变量 `FEISHU_WEBHOOK_URL`。
-3. 如果机器人安全设置开启了“签名校验”，复制 Secret，填到 `FEISHU_WEBHOOK_SECRET`。
-4. 重新部署 Vercel。
-5. 客户提交订单后，飞书群会收到订单消息。
+推荐方式是在管理员后台一键连接：
+
+1. 在 Vercel 环境变量里配置 `KV_REST_API_URL`、`KV_REST_API_TOKEN` 和 `ADMIN_SETUP_TOKEN`。
+2. 重新部署 Vercel。
+3. 打开 `https://xxx.vercel.app/#/admin`。
+4. 切换到“飞书设置”。
+5. 填写管理员部署口令、飞书机器人 Webhook 和签名 Secret。
+6. 点击“保存并发送测试消息”。
+7. 飞书群收到测试消息后，客户下单就会自动推送到飞书群。
+
+也可以直接在 Vercel 环境变量里配置：
+
+```env
+FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-bot-id
+FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
+```
+
+直接配置环境变量后需要重新部署 Vercel。环境变量优先级高于管理员后台保存的飞书配置。
 
 飞书消息示例：
 
@@ -163,7 +177,7 @@ FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
 订单号：order-...
 ```
 
-如果只配置飞书、不配置 KV，客户下单仍然可以推送到飞书群，但管理员后台的集中订单查询需要 KV / Redis 才能正常使用。
+如果只在 Vercel 环境变量里配置飞书、不配置 KV，客户下单仍然可以推送到飞书群，但管理员后台的一键连接和集中订单查询需要 KV / Redis 才能正常使用。
 
 订单数据格式示例：
 
@@ -247,6 +261,7 @@ dist
 VITE_ORDER_WEBHOOK_URL=/api/orders
 KV_REST_API_URL=https://your-redis-url.upstash.io
 KV_REST_API_TOKEN=your_redis_rest_token
+ADMIN_SETUP_TOKEN=change_me_to_a_long_random_password
 FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-bot-id
 FEISHU_WEBHOOK_SECRET=your_feishu_sign_secret
 ```
