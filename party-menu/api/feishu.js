@@ -95,7 +95,7 @@ async function redis(command) {
 
     throw new Error(`不支持的 Redis 命令：${commandName}`);
   } finally {
-    await client.disconnect();
+    await client.quit();
   }
 }
 
