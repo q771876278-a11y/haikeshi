@@ -10,7 +10,7 @@ import OrdersPage from './components/OrdersPage';
 import QrPage from './components/QrPage';
 import SuccessModal from './components/SuccessModal';
 import defaultDishes from './data/dishes.json';
-import { createOrder, hasWebhook, submitOrder } from './utils/orderSubmit';
+import { createOrder, submitOrder } from './utils/orderSubmit';
 import { readStoredDishes } from './utils/storage';
 
 export default function App() {
@@ -82,9 +82,6 @@ export default function App() {
     0,
   );
   const isSubmitting = status.type === 'submitting';
-  const modeMessage = hasWebhook()
-    ? '订单将推送给聚会主人'
-    : '测试模式，订单只保存在当前浏览器';
 
   function updateQuantity(dishId, nextQuantity) {
     setStatus({ type: 'idle', message: '' });
@@ -223,9 +220,6 @@ export default function App() {
                 </div>
                 <h1 className="text-[1.85rem] font-bold leading-tight tracking-normal">阳阳餐厅欢迎您！</h1>
                 <p className="mt-2 text-[1rem] leading-6 text-white/90">朋友聚会娱乐点餐</p>
-                <p className="mt-3 w-fit rounded-full bg-white/18 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                  {modeMessage}
-                </p>
               </div>
             </div>
           </div>

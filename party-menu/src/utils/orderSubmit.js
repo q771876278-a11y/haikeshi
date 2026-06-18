@@ -1,9 +1,10 @@
 import { saveOrderToStorage } from './storage';
 
-const webhookUrl = import.meta.env.VITE_ORDER_WEBHOOK_URL?.trim();
+const orderEndpoint = import.meta.env.VITE_ORDER_WEBHOOK_URL?.trim() || '/api/orders';
+const isDefaultOrderApi = orderEndpoint === '/api/orders';
 
 export function hasWebhook() {
-  return Boolean(webhookUrl);
+  return Boolean(orderEndpoint);
 }
 
 export function createOrder({ customerName, remark, items, totalAmount, totalQuantity }) {
@@ -29,33 +30,40 @@ export function createOrder({ customerName, remark, items, totalAmount, totalQua
 }
 
 export async function submitOrder(order) {
-  if (!hasWebhook()) {
-    saveOrderToStorage(order);
-    return {
-      success: true,
-      mode: 'localStorage',
-      message: '测试订单已保存到本机浏览器。',
-    };
-  }
-
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetch(orderEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(order),
     });
 
-    if (!response.ok) {
-      throw new Error(`Webhook 返回 ${response.status}`);
+    const payload = await response.json().catch(() => ({}));
+
+    if (
+      !response.ok ||
+      payload.success === false ||
+      (isDefaultOrderApi && payload.success !== true)
+    ) {
+      throw new Error(payload.message || `订单后端返回 ${response.status}`);
     }
 
     return {
       success: true,
-      mode: 'webhook',
-      message: '订单已发送，准备开吃。',
+      mode: orderEndpoint,
+      message: payload.message || '订单已提交，管理员后台可查看。',
     };
   } catch (error) {
     console.error('订单提交失败:', error);
+
+    if (isDefaultOrderApi && window.location.hostname === 'localhost') {
+      saveOrderToStorage(order);
+      return {
+        success: true,
+        mode: 'localStorage',
+        message: '本地开发订单已保存。',
+      };
+    }
+
     throw new Error(error.message || 'Webhook 提交失败');
   }
 }

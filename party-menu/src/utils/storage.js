@@ -1,5 +1,10 @@
 export const ORDER_STORAGE_KEY = 'party_menu_orders';
 export const DISH_STORAGE_KEY = 'party_menu_dishes';
+export const ORDER_CHANGE_EVENT = 'party-menu-orders-change';
+
+function notifyOrdersChanged() {
+  window.dispatchEvent(new Event(ORDER_CHANGE_EVENT));
+}
 
 export function readStoredOrders() {
   try {
@@ -12,10 +17,12 @@ export function readStoredOrders() {
 export function saveOrderToStorage(order) {
   const orders = readStoredOrders();
   localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify([order, ...orders]));
+  notifyOrdersChanged();
 }
 
 export function clearStoredOrders() {
   localStorage.removeItem(ORDER_STORAGE_KEY);
+  notifyOrdersChanged();
 }
 
 export function readStoredDishes(defaultDishes) {
